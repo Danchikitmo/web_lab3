@@ -237,8 +237,8 @@
 
                 <replace dir="${basedir}/src/main/java"
                          includes="**/*.java"
-                         token="Example1"
-                         value="Example2" />
+                         token="PointBean"
+                         value="AltPointBean" />
               </target>
             </configuration>
           </execution>
