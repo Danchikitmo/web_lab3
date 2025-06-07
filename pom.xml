@@ -15,8 +15,6 @@
     <maven.compiler.source>16</maven.compiler.source>
     <maven.compiler.target>16</maven.compiler.target>
     <junit.version>5.9.2</junit.version>
-
-    <!-- Параметры SCP -->
     <scp.user>s395233</scp.user>
     <scp.host>helios.se.ifmo.ru</scp.host>
     <scp.path>~</scp.path>
@@ -80,43 +78,30 @@
       </resource>
     </resources>
 
-
     <plugins>
 
+      <!-- clean -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
-        <version>1.0.0</version>
-        <executions>
-          <execution>
-            <phase>initialize</phase>
-            <goals>
-              <goal>read-project-properties</goal>
-            </goals>
-            <configuration>
-              <files>
-                <file>build.properties</file>
-              </files>
-            </configuration>
-          </execution>
-        </executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.3.1</version>
       </plugin>
 
-      <!-- Компиляция -->
+      <!-- compile -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.11.0</version>
       </plugin>
 
-      <!-- WAR-сборка -->
+      <!-- build -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.3.2</version>
       </plugin>
 
-      <!-- Тестирование -->
+      <!-- test -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -126,31 +111,28 @@
         </configuration>
       </plugin>
 
-      <!-- native2ascii -->
+      <!-- scp -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>native2ascii-maven-plugin</artifactId>
-        <version>1.0-beta-1</version>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
         <executions>
           <execution>
-            <id>convert-properties</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>native2ascii</goal>
-            </goals>
+            <id>scp-deploy</id>
+            <phase>verify</phase>
+            <goals><goal>exec</goal></goals>
             <configuration>
-              <encoding>UTF-8</encoding>
-              <includes>
-                <include>**/*.properties</include>
-              </includes>
+              <executable>sh</executable>
+              <arguments>
+                <argument>-c</argument>
+                <argument>scp -P 2222 target/web_lab3.war s395233@helios.se.ifmo.ru:~</argument>
+              </arguments>
             </configuration>
           </execution>
         </executions>
       </plugin>
 
-
-
-      <!-- Документация -->
+      <!-- doc -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -163,37 +145,46 @@
         </executions>
       </plugin>
 
-
-
-      <!-- SCP -->
+      <!-- native2ascii -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.1.0</version>
+        <artifactId>native2ascii-maven-plugin</artifactId>
+        <version>1.0-beta-1</version>
         <executions>
           <execution>
-            <id>scp-deploy</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
+            <id>convert-properties</id>
+            <phase>generate-resources</phase>
+            <goals><goal>native2ascii</goal></goals>
             <configuration>
-              <executable>sh</executable>
-              <arguments>
-                <argument>-c</argument>
-                <argument>
-                  scp -P 2222 target/web_lab3.war s395233@helios.se.ifmo.ru:~
-                </argument>
-              </arguments>
+              <encoding>UTF-8</encoding>
+              <includes><include>**/*.properties</include></includes>
             </configuration>
           </execution>
         </executions>
       </plugin>
 
+      <!-- history -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>history-check</id>
+            <phase>verify</phase>
+            <goals><goal>run</goal></goals>
+            <configuration>
+              <target>
+                <exec executable="bash">
+                  <arg line="${project.basedir}/scripts/history-check.sh" />
+                </exec>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-
-
-      <!-- Git report -->
+      <!-- report -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -218,23 +209,20 @@
         </executions>
       </plugin>
 
-
-      <!-- ALT версия -->
+      <!-- alt -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>3.0.0</version>
         <executions>
           <execution>
+            <id>alt-version</id>
             <phase>generate-sources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
+            <goals><goal>run</goal></goals>
             <configuration>
               <target>
                 <move file="${basedir}/src/main/java/beans/PointBean.java"
                       tofile="${basedir}/src/main/java/beans/AltPointBean.java" />
-
                 <replace dir="${basedir}/src/main/java"
                          includes="**/*.java"
                          token="PointBean"
@@ -244,30 +232,6 @@
           </execution>
         </executions>
       </plugin>
-
-
-      <!-- История-->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <phase>verify</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <exec executable="bash">
-                  <arg line="${project.basedir}/scripts/history-check.sh" />
-                </exec>
-              </target>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
 
     </plugins>
   </build>
