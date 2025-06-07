@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Web Lab 3</title>
+    <h:outputStylesheet name="css/main.css"/>
+    <h:outputScript name="js/plot.js"/>
+    <h:outputScript name="js/validation.js"/>
+    <h:outputScript name="js/main.js"/>
+</h:head>
+
+<h:body>
+    <div class="container">
+        <h1>WEB LAB 3</h1>
+
+        <h:form id="form">
+            <p:panel header="Введите координаты и радиус" styleClass="form-panel">
+                <h:inputHidden value="#{pointBean.x}" id="x"/>
+
+                <label>X:</label>
+                <h:panelGroup id="x_checkboxes" styleClass="form-group">
+                    <ui:repeat value="#{pointBean.XValues}" var="value">
+                        <div class="checkboxik">
+                            <label>
+                                <h:selectBooleanCheckbox value="#{pointBean.checkboxesX[value]}" styleClass="checkbox-x"
+                                                         onchange="updateHiddenX('#{value}', this)">
+                                    <f:ajax execute="@this" event="change"
+                                            listener="#{pointBean.onCheckboxChange(value)}"
+                                            render="x_checkboxes"
+                                    />
+                                </h:selectBooleanCheckbox>
+                                #{value}
+                            </label>
+                        </div>
+                    </ui:repeat>
+                </h:panelGroup>
+
+                <div class="form-group">
+                    <label for="y">Y:</label>
+                    <h:inputText id="y" value="#{pointBean.y}" required="true" styleClass="input-field inputY"
+                                 maxlength="15">
+                        <f:validateDoubleRange minimum="-3" maximum="3" message="Значение Y должно быть числом от -3 до 3"/>
+                        <f:validateLength maximum="15" message="Слишком много символов для Y"/>
+                    </h:inputText>
+                </div>
+
+                <div class="form-group">
+                    <label for="r">Радиус R:</label>
+                    <h:selectOneMenu id="r" value="#{pointBean.r}" required="true" styleClass="input-field" onchange="redrawPlot()">
+                        <f:selectItem itemLabel="1.0" itemValue="1.0"/>
+                        <f:selectItem itemLabel="2.0" itemValue="2.0"/>
+                        <f:selectItem itemLabel="3.0" itemValue="3.0"/>
+                    </h:selectOneMenu>
+                </div>
+
+
+
+                <h:messages id="errors" globalOnly="true" styleClass="error-message"/>
+                <div id="error-message2" class="error-message"></div>
+
+                <h:commandButton value="Проверить" id="submit" styleClass="btn-submit" onclick="return validateForm();">
+                    <f:ajax execute="@form" listener="#{pointBean.checkPoint()}" render="resultTable errors"
+                            onevent="onAjax"/>
+                </h:commandButton>
+            </p:panel>
+        </h:form>
+
+        <div class="graph">
+            <canvas id="plot-canvas" width="500" height="500"></canvas>
+        </div>
+
+        <h2>Результаты</h2>
+        <h:dataTable value="#{resultBean.results}" var="result" id="resultTable" styleClass="resultTable">
+            <h:column>
+                <f:facet name="header">X</f:facet>
+                #{result.x}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Y</f:facet>
+                #{result.y}
+            </h:column>
+            <h:column>
+                <f:facet name="header">R</f:facet>
+                #{result.r}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Попадание</f:facet>
+                #{result.inside ? 'Да' : 'Нет'}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Время выполнения</f:facet>
+                #{result.execTime} ms
+            </h:column>
+            <h:column>
+                <f:facet name="header">Текущее время</f:facet>
+                #{result.currentTime}
+            </h:column>
+        </h:dataTable>
+
+        <h:link value="Назад на главную" outcome="index" styleClass="back-link"/>
+    </div>
+</h:body>
+</html>

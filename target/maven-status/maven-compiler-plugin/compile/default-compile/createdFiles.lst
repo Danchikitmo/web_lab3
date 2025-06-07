@@ -1,0 +1,6 @@
+beans/PointBean.class
+Main.class
+db/ResultDAO.class
+entity/Result.class
+beans/ResultBean.class
+util/AreaChecker.class
